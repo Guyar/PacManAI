@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.*;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -27,7 +28,7 @@ public class Main extends Application {
 	{
 		//BuildGUI windowMain = new BuildGUI(stage);
 		myService = new MyService();
-		
+
 		//Builds the GUI
 		Button btn = new Button();
         btn.setText("Start Game");
@@ -49,7 +50,6 @@ public class Main extends Application {
 		System.out.println("aaaa");//
 		
 	}
-	
 	private class MyService extends Service<Void> {
 		 
         @Override
@@ -61,7 +61,7 @@ public class Main extends Application {
                         if (isCancelled()) {
                             break;
                         }
-                        ScreenShot a = new ScreenShot(50,50);
+                        ScreenShot a = new ScreenShot(800,274);
  
                         Thread.sleep(100);
                     }

@@ -10,13 +10,12 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ScreenShot {
-
+public class ScreenShot  {
 	public ScreenShot(int x, int y) throws Exception {
 		Robot robot = new Robot();
 
-	    int width = 200;
-	    int height = 200;
+	    int width = 455;
+	    int height = 550;
 	    Rectangle area = new Rectangle(x, y, width, height);
 	    BufferedImage bufferedImage = robot.createScreenCapture(area);
 	    
@@ -26,4 +25,3 @@ public class ScreenShot {
 	}
 
 }
-
