@@ -8,7 +8,8 @@ public class SimpleAI implements Constants{
 
 
         int direction = gs.closestPillDir();
-        
+        System.out.println("Action choosen");
+        //System.out.println(direction);
         return direction;
 
 

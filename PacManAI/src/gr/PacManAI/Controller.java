@@ -1,6 +1,7 @@
 package gr.PacManAI;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 public class Controller {
@@ -29,4 +30,10 @@ public class Controller {
             robot.waitForIdle();
         }
     }
+    public void StartGame() {
+    	robot.mouseMove(955,480);
+    	robot.mousePress( InputEvent.BUTTON1_MASK );
+    	robot.mouseRelease( InputEvent.BUTTON1_MASK );
+
+	}
 }

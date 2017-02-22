@@ -1,6 +1,7 @@
 package gr.PacManAI;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.opencv.core.Core;
@@ -15,6 +16,8 @@ public class PacManInterface {
 
 	public static int width = 448;
     public static int height = 550;
+    
+    static String currentState;
         
     //these are all bgr
     static Scalar blinky = new Scalar(0, 0, 221);//red
@@ -47,24 +50,47 @@ public class PacManInterface {
 		Controller c = new Controller();
 		SimpleAI ai = new SimpleAI();//goes towards the closest pill
 		
-		//determineState();
-		while(true) {				
-			pac.analyseComponents();
+		
+		while(true) {	
+			pac.determineState();
+			if(currentState == "StartScreen") {
+				c.StartGame();
+			}
 			
+			pac.updateGameState();
+			System.out.println("gamestate Updated?");
 			int action = ai.getAction(pac.ie.gs);
-
+			
 			c.move(action);
 			
 			Thread.sleep(delay);
 		}
 	}
+	
 	public void determineState() {
-
+		Color color = robot.getPixelColor(955, 480);
+		int rgb = color.getRGB();
+		if( rgb == -16777216) {
+			currentState = "StartScreen";
+			
+			return;
+		}
+		color = robot.getPixelColor(950, 410);
+		rgb = color.getRGB();
+		if(rgb == -16774081) {
+			currentState = "Ready";
+			//ie.createMaze(wall);
+			return;
+			
+		}
+		currentState = "Playing";
 		
 	}
-	public void analyseComponents() throws Exception {
+
+	public void updateGameState() throws Exception {
+		ie.gs.reset();
 		ie.TakeScreenShot(colours);
-        ie.gs.reset();
+        
     }
 	
 	public PacManInterface() throws Exception {

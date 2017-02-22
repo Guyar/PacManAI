@@ -10,7 +10,6 @@ public class GameState implements Constants{
 	
 	Point2D closestPill;
 	Point2D cur, prev, tmp;
-	int[] distanceToWalls;
 	int currentDirection;
 	int move;
 	static Point2D[] directions = {
@@ -30,10 +29,11 @@ public class GameState implements Constants{
 		
     }
 	public void update(int type, Point2D coordinates, double contourArea) {	
+		
 		if (isWall(type)) {
 			
 		} else if (isPacMan(type, coordinates, contourArea)) {
-			System.out.println("pacman = " + coordinates);
+			//System.out.println("pacman = " + coordinates);
             updatePacMan(coordinates);
 
         } else if (isGhost(contourArea)) {     	
@@ -74,11 +74,10 @@ public class GameState implements Constants{
     	return area > 346.0 && area < 431.0;
     }
     
-    private void updateClosestPill(Point2D coord) {    	
-    	if (closestPill == null) {
-    		closestPill = new Point2D.Double(coord.getX(),coord.getY());        
-        } else if (coord.distance(cur) < closestPill.distance(cur)) {
-        	//System.out.println("pill = " + coord);
+    public void updateClosestPill(Point2D coord) {
+    	if (closestPill == null) {	
+    		closestPill = new Point2D.Double(coord.getX(),coord.getY());
+        } else if (coord.distance(cur) < closestPill.distance(cur)) {   	
         	closestPill.setLocation(coord);//checks if the pill is closer than the current closest pill
         }
 	}
@@ -89,6 +88,8 @@ public class GameState implements Constants{
     	for (int i = 0; i < directions.length; i++) {
 			tmp.setLocation((cur.getX()+directions[i].getX()),(cur.getY()+directions[i].getY()));
 
+			//double curScore = (cur.getX() - tmp.getX()) + (cur.getY() - tmp.getY());
+			//System.out.println(closestPill);
             double curScore = tmp.distance(closestPill);
             if (curScore < best) {
             	closestPillDir = i;
@@ -96,6 +97,7 @@ public class GameState implements Constants{
             }
         }
     	closestPillDir += 1; //so it matches directions 	
+    	System.out.println("closestPillDir = " + closestPillDir);
     	if (closestPillDir == currentDirection) {
     		closestPillDir = NEUTRAL;
         }

@@ -26,7 +26,6 @@ import org.opencv.imgproc.Imgproc;
 public class ImageExtractor {
 	Robot robot;
 	Rectangle area;
-	Map<Integer, Point2D> objects;
     GameState gs;
     
     JFrame frame=new JFrame();//testing
@@ -76,7 +75,7 @@ public class ImageExtractor {
         Mat hierarchy = new Mat();
         
 		Mat maze = null;//testing
-		for(int x = 0; x < colours.size(); x++) {
+		for(int x = 0; x < colours.size()-1; x++) {
         	Core.inRange(src, colours.get(x), colours.get(x), mask);
         	
         	ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();      	
