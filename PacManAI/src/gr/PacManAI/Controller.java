@@ -31,7 +31,7 @@ public class Controller {
         }
     }
     public void StartGame() {
-    	robot.mouseMove(955,480);
+    	robot.mouseMove(960, 505);
     	robot.mousePress( InputEvent.BUTTON1_MASK );
     	robot.mouseRelease( InputEvent.BUTTON1_MASK );
 

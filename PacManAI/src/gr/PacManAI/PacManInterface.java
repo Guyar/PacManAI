@@ -8,13 +8,13 @@ import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 
 public class PacManInterface {
-	static int delay = 10;
+	static int delay = 30;
 	
 	Robot robot;
 
 	ImageExtractor ie;
 
-	public static int width = 448;
+	public static int width = 450;
     public static int height = 550;
     
     static String currentState;
@@ -58,7 +58,7 @@ public class PacManInterface {
 			}
 			
 			pac.updateGameState();
-			System.out.println("gamestate Updated?");
+			//System.out.println("gamestate Updated?");
 			int action = ai.getAction(pac.ie.gs);
 			
 			c.move(action);
@@ -67,17 +67,17 @@ public class PacManInterface {
 		}
 	}
 	
-	public void determineState() {
-		Color color = robot.getPixelColor(955, 480);
-		int rgb = color.getRGB();
-		if( rgb == -16777216) {
-			currentState = "StartScreen";
-			
+	public void determineState() throws Exception {
+		
+		Color color = robot.getPixelColor(960, 505);
+		int rgb = color.getRGB();		
+		if( rgb == -3355444) {
+			currentState = "StartScreen";		
 			return;
 		}
-		color = robot.getPixelColor(950, 410);
+		color = robot.getPixelColor(950, 405);
 		rgb = color.getRGB();
-		if(rgb == -16774081) {
+		if(rgb == -1) {		
 			currentState = "Ready";
 			//ie.createMaze(wall);
 			return;

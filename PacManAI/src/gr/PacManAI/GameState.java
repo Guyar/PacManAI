@@ -28,14 +28,12 @@ public class GameState implements Constants{
 		closestPill = null;
 		
     }
-	public void update(int type, Point2D coordinates, double contourArea) {	
-		
+	public void update(int type, Point2D coordinates, double contourArea) {	        
 		if (isWall(type)) {
 			
 		} else if (isPacMan(type, coordinates, contourArea)) {
-			//System.out.println("pacman = " + coordinates);
             updatePacMan(coordinates);
-
+            
         } else if (isGhost(contourArea)) {     	
 	        if (type == 0) {//blinky
 	            // need to update the state of the ghost distance
@@ -48,7 +46,6 @@ public class GameState implements Constants{
 	        	ghostLoc.put(3, coordinates);
 	        }
         } else if (isPill(contourArea)) {
-            // keep track of the position of the closest pill
             pills.add(coordinates);
             
             updateClosestPill(coordinates);
@@ -62,7 +59,7 @@ public class GameState implements Constants{
 	}
 	
 	public boolean isPacMan(int type, Point2D coords, double area) {		
-		return area > 289.5 && area < 392.5 && coords.getX() < 304.0 && coords.getY() < 511.0 && type == 4;
+		return coords.getY() < 495.0 && type == 4;
         //only do it if coordinates aren't outside the game
     }
 
@@ -78,13 +75,15 @@ public class GameState implements Constants{
     	if (closestPill == null) {	
     		closestPill = new Point2D.Double(coord.getX(),coord.getY());
         } else if (coord.distance(cur) < closestPill.distance(cur)) {   	
-        	closestPill.setLocation(coord);//checks if the pill is closer than the current closest pill
+        	closestPill.setLocation(coord);//checks if the pill is closer than the current closest pill   	
         }
 	}
     
     public int closestPillDir() {
     	int closestPillDir = -1;
     	double best = 100000;
+    	
+        
     	for (int i = 0; i < directions.length; i++) {
 			tmp.setLocation((cur.getX()+directions[i].getX()),(cur.getY()+directions[i].getY()));
 
@@ -97,7 +96,6 @@ public class GameState implements Constants{
             }
         }
     	closestPillDir += 1; //so it matches directions 	
-    	System.out.println("closestPillDir = " + closestPillDir);
     	if (closestPillDir == currentDirection) {
     		closestPillDir = NEUTRAL;
         }

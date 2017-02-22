@@ -7,8 +7,10 @@ import java.awt.Robot;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.File;
 import java.util.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -67,6 +69,12 @@ public class ImageExtractor {
     
     public void TakeScreenShot(ArrayList<Scalar> colours) throws Exception {
 	    BufferedImage bufferedImage = robot.createScreenCapture(area);
+	    
+	    /*
+	    File outputfile = new File("image.png");
+	    ImageIO.write(bufferedImage, "png", outputfile);
+	    */
+	    
 	    Mat src = img2Mat(bufferedImage);
         
         Mat mask = new Mat();
@@ -75,7 +83,7 @@ public class ImageExtractor {
         Mat hierarchy = new Mat();
         
 		Mat maze = null;//testing
-		for(int x = 0; x < colours.size()-1; x++) {
+		for(int x = 0; x < colours.size()-2; x++) {
         	Core.inRange(src, colours.get(x), colours.get(x), mask);
         	
         	ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();      	
@@ -83,10 +91,11 @@ public class ImageExtractor {
     		
     		for( int i = 0; i < contours.size();i++){
     			Rect rect = Imgproc.boundingRect(contours.get(i));
-    			Point2D coordinates = new Point2D.Double(rect.x, rect.y);
+    			
+    			Point2D coordinates = new Point2D.Double((rect.x + (rect.width/2)) ,(rect.y + (rect.height/2)));
     			double contourArea = Imgproc.contourArea(contours.get(i));	
     			
-				gs.update(x, coordinates, contourArea);				
+				gs.update(x, coordinates, contourArea);
 			}
     		
     		//testing
