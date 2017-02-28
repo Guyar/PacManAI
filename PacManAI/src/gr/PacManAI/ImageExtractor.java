@@ -73,7 +73,7 @@ public class ImageExtractor {
     				double contourArea = Imgproc.contourArea(contour);
     				if(contourArea == 1.0){
     					Tiles[x][y].type = type.Pill;
-    					GameState.pills.add(Tiles[x][y]);
+    					GameState.pills.add(Tiles[x][y]);//is this okay to do?
     				} else {
     					Tiles[x][y].type = type.Power;
     				}

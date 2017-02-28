@@ -81,7 +81,7 @@ public class PacManInterface {
 		}
 		color = robot.getPixelColor(950, 405);
 		rgb = color.getRGB();
-		if(rgb == -1) {
+		if(rgb == -1) {//this will may set off if a ghost goes through?
 			currentState = "Ready";
 			
 			return;

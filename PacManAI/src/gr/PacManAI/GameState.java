@@ -3,14 +3,8 @@ package gr.PacManAI;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import org.opencv.core.Core;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import gr.PacManAI.Tile.type;
 
@@ -89,7 +83,7 @@ public class GameState implements Constants{
     		int centerY = (tile.y*blocksize)+8;
     		
     		int rgb = image.getRGB(centerX,centerY);
-    		if(rgb != pillColour){//make sure this is rbg not bgr
+    		if(rgb != pillColour){
     			tile.type = type.Bkgnd;
     			pills.remove(tile);
     		}
@@ -157,6 +151,7 @@ public class GameState implements Constants{
         } else if (tmp.dotProduct(vLeft) > 0) {
         	currentDirection = LEFT;
         }
+        // could use case???
         */
 
 

@@ -28,10 +28,17 @@ public class Tile {
 		} else if(d == 4){
 			return left;
 		}
-		return null;
+		return null;//this may mess up with tunnel + other stuff
     }
 	
 	
-	//dist(tile, tile)
-	//dist(point x, point y, tile)
+	public int dist(Tile tile){
+		return Math.abs(x-tile.x) + Math.abs(y-tile.y);
+	}
+	
+	public int dist(int xcoord, int ycoord){
+		return Math.abs(x-xcoord) + Math.abs(y-ycoord);
+		
+	}
+	
 }
