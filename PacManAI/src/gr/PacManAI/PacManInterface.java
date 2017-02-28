@@ -39,9 +39,13 @@ public class PacManInterface {
         colours.add(clyde);
         colours.add(pacman);
         colours.add(edible);
-        colours.add(pill);
-        colours.add(wall);
-        colours.add(background);
+    }
+    
+    static ArrayList<Scalar> mazeColours = new ArrayList<Scalar>(); 
+    static {
+    	mazeColours.add(pill);
+    	mazeColours.add(wall);
+    	mazeColours.add(background);
     }
 	
 	public static void main(String[] args) throws Exception {
@@ -56,9 +60,9 @@ public class PacManInterface {
 			if(currentState == "StartScreen") {
 				c.StartGame();
 			}
-			
+
 			pac.updateGameState();
-			//System.out.println("gamestate Updated?");
+			
 			int action = ai.getAction(pac.ie.gs);
 			
 			c.move(action);
@@ -70,16 +74,16 @@ public class PacManInterface {
 	public void determineState() throws Exception {
 		
 		Color color = robot.getPixelColor(960, 505);
-		int rgb = color.getRGB();		
+		int rgb = color.getRGB();
 		if( rgb == -3355444) {
 			currentState = "StartScreen";		
 			return;
 		}
 		color = robot.getPixelColor(950, 405);
 		rgb = color.getRGB();
-		if(rgb == -1) {		
+		if(rgb == -1) {
 			currentState = "Ready";
-			//ie.createMaze(wall);
+			
 			return;
 			
 		}
@@ -89,14 +93,14 @@ public class PacManInterface {
 
 	public void updateGameState() throws Exception {
 		ie.gs.reset();
-		ie.TakeScreenShot(colours);
-        
+		ie.update(colours);
+		
     }
 	
 	public PacManInterface() throws Exception {
         robot = new Robot();
         ie = new ImageExtractor(737, 138, width, height);
-        //ie.createMaze(wall);//should only make this run when game starts
+        ie.createMaze(mazeColours);
 
 	}
 	

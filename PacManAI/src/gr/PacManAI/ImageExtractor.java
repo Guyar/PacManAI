@@ -24,56 +24,105 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import gr.PacManAI.Tile.type;
+
 
 public class ImageExtractor {
 	Robot robot;
 	Rectangle area;
     GameState gs;
     
+    int width;
+    int height;
+    int tilewidth = 28;
+    int tileheight = 31;
+    int blocksize = 16;
+    
     JFrame frame=new JFrame();//testing
     JLabel lbl=new JLabel();//testing
+	public Tile[][] Tiles;
     
     public ImageExtractor(int x, int y, int width, int height) throws Exception {
     	robot = new Robot();
 		area = new Rectangle(x, y, width, height);
         gs = new GameState();
         
+        Tiles = new Tile[tilewidth][tileheight];       
     }
-    
-   
-	public ArrayList<MatOfPoint> createMaze(Scalar colour) {
-		BufferedImage bufferedImage = robot.createScreenCapture(area);
-		Mat src = img2Mat(bufferedImage);
-		
-		Mat hierarchy = new Mat();
-		Mat mask = new Mat();
-		ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();  
-		
-		Core.inRange(src, colour, colour, mask);
-		Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-		
-		int dilation_size = 10;
-		Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2*dilation_size + 1, 2*dilation_size+1));
-		Imgproc.dilate(mask, mask, element);
-		
-		
-		for( int i = 1; i < contours.size();i++){
-			Imgproc.drawContours(mask, contours, i, new Scalar(255, 255, 255), -1);
-		}
-		showImage(mask);
-		
-		return null;
-		
-	}
 
+    public void createMaze(ArrayList<Scalar> mazeColours) {
+    	
+    	BufferedImage bufferedImage = robot.createScreenCapture(area);
+    	Mat src = img2Mat(bufferedImage);
+        
+        Mat mask = new Mat();
+        Mat hierarchy = new Mat();
+        //split image into 28,29 16x16 tiles
+        
+    	for (int x = 0; x < tilewidth; x++) {//number of tiles in x direction 
+        	for(int y = 0; y < tileheight; y++) {//number of tiles in y direction
+        		Tiles[x][y] = new Tile(x, y, type.Bkgnd);
+        		
+        		Rect roi = new Rect((x*blocksize), (y*blocksize),blocksize, blocksize);	
+        		//pills 
+        		Core.inRange(src, mazeColours.get(0), mazeColours.get(0), mask);
+        		Mat aaa = mask.submat( roi );
+        		ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        		Imgproc.findContours(aaa, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        		for(MatOfPoint contour : contours){
+    				double contourArea = Imgproc.contourArea(contour);
+    				if(contourArea == 1.0){
+    					Tiles[x][y].type = type.Pill;
+    					GameState.pills.add(Tiles[x][y]);
+    				} else {
+    					Tiles[x][y].type = type.Power;
+    				}
+        		}
+        		//walls
+        		Core.inRange(src, mazeColours.get(1), mazeColours.get(1), mask);
+        		aaa = mask.submat( roi );
+        		contours = new ArrayList<MatOfPoint>();
+        		Imgproc.findContours(aaa, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        		if(contours.size() > 0) {
+        			Tiles[x][y] = new Tile(x, y, type.Wall);
+        		}
+        	}
+    	}
+    	
+    	//testing
+    	for (int c = 0; c <tileheight;c++){
+	    	for (int r = 0; r<tilewidth;r++){
+    	    	
+    	        System.out.print(r + " " + c + " ");
+    	        System.out.print(Tiles[r][c].type + "\t");
+    	    }
+    	    System.out.println();
+    	}
+	}
     
-    public void TakeScreenShot(ArrayList<Scalar> colours) throws Exception {
-	    BufferedImage bufferedImage = robot.createScreenCapture(area);
-	    
-	    /*
+    public void update(ArrayList<Scalar> colours) throws Exception {
+    	BufferedImage bufferedImage = robot.createScreenCapture(area);
+    	updatePacmanGhosts(bufferedImage, colours);
+    	gs.updatePills(bufferedImage);
+    	gs.updatePowerPills(bufferedImage);
+    	/*
 	    File outputfile = new File("image.png");
 	    ImageIO.write(bufferedImage, "png", outputfile);
 	    */
+    	
+    	/*//testing
+    	for (int c = 0; c <tileheight;c++){
+	    	for (int r = 0; r<tilewidth;r++){
+    	    	
+    	        System.out.print(r + " " + c + " ");
+    	        System.out.print(Tiles[r][c].type + "\t");
+    	    }
+    	    System.out.println();
+    	}*/
+	}
+
+    public void updatePacmanGhosts(BufferedImage bufferedImage, ArrayList<Scalar> colours) throws Exception {	    
+	  
 	    
 	    Mat src = img2Mat(bufferedImage);
         
@@ -81,9 +130,8 @@ public class ImageExtractor {
         Mat combMask = null;//testing
 
         Mat hierarchy = new Mat();
-        
-		Mat maze = null;//testing
-		for(int x = 0; x < colours.size()-2; x++) {
+		
+		for(int x = 0; x < colours.size(); x++) {
         	Core.inRange(src, colours.get(x), colours.get(x), mask);
         	
         	ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();      	
@@ -95,7 +143,7 @@ public class ImageExtractor {
     			Point2D coordinates = new Point2D.Double((rect.x + (rect.width/2)) ,(rect.y + (rect.height/2)));
     			double contourArea = Imgproc.contourArea(contours.get(i));	
     			
-				gs.update(x, coordinates, contourArea);
+				gs.updateLocations(x, coordinates, contourArea, bufferedImage);
 			}
     		
     		//testing
@@ -114,6 +162,8 @@ public class ImageExtractor {
 		//System.out.println("image extraction done");
 		
 	}
+    
+    
     
     public void showImage(Mat combMask){
     	BufferedImage img2 = mat2img(combMask);
@@ -158,6 +208,8 @@ public class ImageExtractor {
 	      System.arraycopy(b, 0, targetPixels, 0, b.length);  
 	      return image;
 	}
+
+	
 
 
 }

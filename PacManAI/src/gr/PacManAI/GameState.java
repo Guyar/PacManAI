@@ -1,17 +1,31 @@
 package gr.PacManAI;
 
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import org.opencv.core.Core;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
+import gr.PacManAI.Tile.type;
 
 public class GameState implements Constants{
-	static ArrayList<Point2D> pills; 
+	static ArrayList<Tile> pills; 
+	static ArrayList<Tile> powerPills;
 	static HashMap<Integer,Point2D> ghostLoc = new HashMap<Integer,Point2D>();
 	
 	Point2D closestPill;
 	Point2D cur, prev, tmp;
 	int currentDirection;
 	int move;
+	int blocksize = 16;
+	int pillColour = -1;
+	
 	static Point2D[] directions = {
             new Point2D.Double(0, -1),
             new Point2D.Double(1, 0),
@@ -24,14 +38,14 @@ public class GameState implements Constants{
     	cur = new Point2D.Double(0, 0);
     	tmp = new Point2D.Double(0, 0);	
 					
-		pills = new ArrayList<Point2D>(); 
+		pills = new ArrayList<Tile>(); 
+		powerPills = new ArrayList<Tile>(); 
 		closestPill = null;
 		
     }
-	public void update(int type, Point2D coordinates, double contourArea) {	        
-		if (isWall(type)) {
-			
-		} else if (isPacMan(type, coordinates, contourArea)) {
+	
+	public void updateLocations(int type, Point2D coordinates, double contourArea, BufferedImage image) {	   			
+		if (isPacMan(type, coordinates, contourArea)) {
             updatePacMan(coordinates);
             
         } else if (isGhost(contourArea)) {     	
@@ -45,32 +59,43 @@ public class GameState implements Constants{
 	        } else if (type == 3) {
 	        	ghostLoc.put(3, coordinates);
 	        }
-        } else if (isPill(contourArea)) {
-            pills.add(coordinates);
-            
-            updateClosestPill(coordinates);
-            
         }
-
     }
 	
-	private boolean isWall(int type) {
-		return type == 7;//this needs setting
+	public void updatePills(BufferedImage image) {
+		for (Iterator<Tile> iterator = pills.iterator(); iterator.hasNext();) {
+		    Tile pill = iterator.next();
+		    int centerX = (pill.x*blocksize)+8;
+    		int centerY = (pill.y*blocksize)+8;
+    		
+    		int rgb = image.getRGB(centerX,centerY);
+    		if(rgb != pillColour){//make sure this is rbg not bgr
+    			//System.out.print(pill.x + " " + pill.y + " ");
+	    	    //System.out.println();
+    			pill.type = type.Bkgnd;
+    			iterator.remove();
+    		}/* else {
+    			updateClosestPill();
+    		}*/
+		}
+		System.out.println("pills" + pills.size());
+		
 	}
+	public void updatePowerPills(BufferedImage image) {
+		for (Tile tile : powerPills){
+    		type type = tile.type;
+    		
+    		int centerX = (tile.x*blocksize)+8;
+    		int centerY = (tile.y*blocksize)+8;
+    		
+    		int rgb = image.getRGB(centerX,centerY);
+    		if(rgb != pillColour){//make sure this is rbg not bgr
+    			tile.type = type.Bkgnd;
+    			pills.remove(tile);
+    		}
+    	}
+	}	
 	
-	public boolean isPacMan(int type, Point2D coords, double area) {		
-		return coords.getY() < 495.0 && type == 4;
-        //only do it if coordinates aren't outside the game
-    }
-
-    public boolean isPill(double area) {
-    	return area == 1.0;
-    }
-    
-    public boolean isGhost(double area) {
-    	return area > 346.0 && area < 431.0;
-    }
-    
     public void updateClosestPill(Point2D coord) {
     	if (closestPill == null) {	
     		closestPill = new Point2D.Double(coord.getX(),coord.getY());
@@ -132,10 +157,18 @@ public class GameState implements Constants{
         } else if (tmp.dotProduct(vLeft) > 0) {
         	currentDirection = LEFT;
         }
-        // could use case???
         */
 
 
+    }
+    
+    public boolean isPacMan(int type, Point2D coords, double area) {		
+		return coords.getY() < 495.0 && type == 4;
+        //only do it if coordinates aren't outside the game
+    }
+    
+    public boolean isGhost(double area) {
+    	return area > 346.0 && area < 431.0;
     }
     
     private double round(double value){
