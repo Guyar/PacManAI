@@ -102,6 +102,7 @@ public class ImageExtractor {
     
     public void update(ArrayList<Scalar> colours) throws Exception {
     	BufferedImage bufferedImage = robot.createScreenCapture(area);
+    	
     	updatePacmanGhosts(bufferedImage, colours);
     	gs.updatePills(bufferedImage);
     	gs.updatePowerPills(bufferedImage);

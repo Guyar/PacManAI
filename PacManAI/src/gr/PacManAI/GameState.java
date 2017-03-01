@@ -13,7 +13,7 @@ public class GameState implements Constants{
 	static ArrayList<Tile> powerPills;
 	static HashMap<Integer,Point2D> ghostLoc = new HashMap<Integer,Point2D>();
 	
-	Point2D closestPill;
+	Tile closestPill;
 	Point2D cur, prev, tmp;
 	int currentDirection;
 	int move;
@@ -64,15 +64,16 @@ public class GameState implements Constants{
     		
     		int rgb = image.getRGB(centerX,centerY);
     		if(rgb != pillColour){//make sure this is rbg not bgr
-    			//System.out.print(pill.x + " " + pill.y + " ");
+    			//System.out.println(pill.x + " " + pill.y + " ");
 	    	    //System.out.println();
     			pill.type = type.Bkgnd;
     			iterator.remove();
-    		}/* else {
-    			updateClosestPill();
-    		}*/
+    		} else {
+    			System.out.println(pill.x + " " + pill.y + " ");
+    			updateClosestPill(pill);
+    		}
 		}
-		System.out.println("pills" + pills.size());
+		//System.out.println("pills " + pills.size());
 		
 	}
 	public void updatePowerPills(BufferedImage image) {
@@ -90,11 +91,12 @@ public class GameState implements Constants{
     	}
 	}	
 	
-    public void updateClosestPill(Point2D coord) {
+    public void updateClosestPill(Tile pill) {
     	if (closestPill == null) {	
-    		closestPill = new Point2D.Double(coord.getX(),coord.getY());
-        } else if (coord.distance(cur) < closestPill.distance(cur)) {   	
-        	closestPill.setLocation(coord);//checks if the pill is closer than the current closest pill   	
+    		closestPill = pill;
+        } else if (pill.dist(cur.getX(),cur.getY()) < closestPill.dist(cur.getX(),cur.getY())) {   
+        	closestPill = pill;//checks if the pill is closer than the current closest pill
+        	System.out.println(pill.dist(cur.getX(),cur.getY()));
         }
 	}
     
@@ -102,13 +104,14 @@ public class GameState implements Constants{
     	int closestPillDir = -1;
     	double best = 100000;
     	
-        
     	for (int i = 0; i < directions.length; i++) {
-			tmp.setLocation((cur.getX()+directions[i].getX()),(cur.getY()+directions[i].getY()));
-
+			//tmp.setLocation((cur.getX()+directions[i].getX()),(cur.getY()+directions[i].getY()));
+			double tempx = cur.getX()+directions[i].getX();
+			double tempy = cur.getX()+directions[i].getX();
+			
 			//double curScore = (cur.getX() - tmp.getX()) + (cur.getY() - tmp.getY());
 			//System.out.println(closestPill);
-            double curScore = tmp.distance(closestPill);
+            double curScore = closestPill.dist(tempx,tempy);
             if (curScore < best) {
             	closestPillDir = i;
                 best = curScore;

@@ -36,7 +36,9 @@ public class Tile {
 		return Math.abs(x-tile.x) + Math.abs(y-tile.y);
 	}
 	
-	public int dist(int xcoord, int ycoord){
+	public double dist(double xcoord, double ycoord){
+		xcoord = Math.floor(xcoord/16);
+		ycoord = Math.floor(ycoord/16);
 		return Math.abs(x-xcoord) + Math.abs(y-ycoord);
 		
 	}

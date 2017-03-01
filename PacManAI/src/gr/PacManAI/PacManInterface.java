@@ -53,8 +53,7 @@ public class PacManInterface {
 		PacManInterface pac = new PacManInterface();
 		Controller c = new Controller();
 		SimpleAI ai = new SimpleAI();//goes towards the closest pill
-		
-		
+			
 		while(true) {	
 			pac.determineState();
 			if(currentState == "StartScreen") {
