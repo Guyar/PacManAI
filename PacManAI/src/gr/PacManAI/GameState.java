@@ -18,7 +18,7 @@ public class GameState implements Constants{
 	int currentDirection;
 	int move;
 	int blocksize = 16;
-	int pillColour = -1;
+	int bkgndColour = -205;
 	
 	static Point2D[] directions = {
             new Point2D.Double(0, -1),
@@ -63,13 +63,13 @@ public class GameState implements Constants{
     		int centerY = (pill.y*blocksize)+8;
     		
     		int rgb = image.getRGB(centerX,centerY);
-    		if(rgb != pillColour){//make sure this is rbg not bgr
+    		if(rgb == bkgndColour){//make sure this is rbg not bgr
     			//System.out.println(pill.x + " " + pill.y + " ");
 	    	    //System.out.println();
     			pill.type = type.Bkgnd;
     			iterator.remove();
     		} else {
-    			System.out.println(pill.x + " " + pill.y + " ");
+    			//System.out.println(pill.x + " " + pill.y + " ");
     			updateClosestPill(pill);
     		}
 		}
@@ -84,7 +84,7 @@ public class GameState implements Constants{
     		int centerY = (tile.y*blocksize)+8;
     		
     		int rgb = image.getRGB(centerX,centerY);
-    		if(rgb != pillColour){
+    		if(rgb != bkgndColour){
     			tile.type = type.Bkgnd;
     			pills.remove(tile);
     		}
@@ -96,7 +96,7 @@ public class GameState implements Constants{
     		closestPill = pill;
         } else if (pill.dist(cur.getX(),cur.getY()) < closestPill.dist(cur.getX(),cur.getY())) {   
         	closestPill = pill;//checks if the pill is closer than the current closest pill
-        	System.out.println(pill.dist(cur.getX(),cur.getY()));
+        	//System.out.println(pill.dist(cur.getX(),cur.getY()));
         }
 	}
     
