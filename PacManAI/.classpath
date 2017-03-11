@@ -8,5 +8,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Guy/Downloads/opencv/build/java/x64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Guy/Dropbox/Final Project/FinalProject/PacManAI/lib/jna-4.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

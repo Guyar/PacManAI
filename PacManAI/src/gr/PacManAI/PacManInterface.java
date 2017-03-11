@@ -1,21 +1,17 @@
 package gr.PacManAI;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 
 public class PacManInterface {
-	static int delay = 30;
+	static int delay = 10;
 	
 	Robot robot;
 
-	ImageExtractor ie;
-
-	public static int width = 450;
-    public static int height = 550;
+	GameState gs;
     
     static String currentState;
         
@@ -52,9 +48,10 @@ public class PacManInterface {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		PacManInterface pac = new PacManInterface();
 		Controller c = new Controller();
-		SimpleAI ai = new SimpleAI();//goes towards the closest pill
+		//SimpleAI ai = new SimpleAI();//goes towards the closest pill
+		AISimpleGhostAvoidance ai = new AISimpleGhostAvoidance();//goes towards the closest pill and poorly avoids ghosts
 			
-		while(true) {	
+		while(true) {
 			pac.determineState();
 			if(currentState == "StartScreen") {
 				c.StartGame();
@@ -62,7 +59,7 @@ public class PacManInterface {
 
 			pac.updateGameState();
 			
-			int action = ai.getAction(pac.ie.gs);
+			int action = ai.getAction(pac.gs);
 			
 			c.move(action);
 			
@@ -80,7 +77,7 @@ public class PacManInterface {
 		}
 		color = robot.getPixelColor(950, 405);
 		rgb = color.getRGB();
-		if(rgb == -1) {//this will may set off if a ghost goes through?
+		if(rgb == -1) {
 			currentState = "Ready";
 			
 			return;
@@ -91,16 +88,13 @@ public class PacManInterface {
 	}
 
 	public void updateGameState() throws Exception {
-		ie.gs.reset();
-		ie.update(colours);
+		gs.reset();
+		gs.update();
 		
     }
 	
 	public PacManInterface() throws Exception {
         robot = new Robot();
-        ie = new ImageExtractor(737, 138, width, height);
-        ie.createMaze(mazeColours);
-
-	}
-	
+        gs = new GameState();
+	}	
 }

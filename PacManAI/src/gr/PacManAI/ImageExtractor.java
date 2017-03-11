@@ -4,6 +4,7 @@ import java.awt.AWTException;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -25,33 +26,80 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import gr.PacManAI.Tile.type;
+import javax.swing.JTextPane;
+import javax.swing.border.EmptyBorder;
 
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+import javax.swing.JComboBox;
+import java.awt.Dimension;
+import java.awt.Color;
 
 public class ImageExtractor {
 	Robot robot;
 	Rectangle area;
-    GameState gs;
-    
-    int width;
-    int height;
+	
+	Point2D pacCoordinates;
+	HashMap<Integer,Point2D> ghostLoc = new HashMap<Integer,Point2D>();
+	HashMap<Integer,Point2D> edibleGhostLoc = new HashMap<Integer,Point2D>();
+	
     int tilewidth = 28;
     int tileheight = 31;
     int blocksize = 16;
     
-    JFrame frame=new JFrame();//testing
-    JLabel lbl=new JLabel();//testing
-	public Tile[][] Tiles;
     
-    public ImageExtractor(int x, int y, int width, int height) throws Exception {
+	Tile[][] Tiles;
+	ArrayList<Tile> pills; 
+	ArrayList<Tile> powerPills;
+    
+    public ImageExtractor(Rectangle area) throws Exception {   	
+    	this.area = area;
     	robot = new Robot();
-		area = new Rectangle(x, y, width, height);
-        gs = new GameState();
         
-        Tiles = new Tile[tilewidth][tileheight];       
+        Tiles = new Tile[tilewidth][tileheight]; 
+        pills = new ArrayList<Tile>(); 
+		powerPills = new ArrayList<Tile>(); 
     }
-
-    public void createMaze(ArrayList<Scalar> mazeColours) {
+    
+    public void surroundingTiles() {
+    	for (int x = 0; x < tilewidth; x++) {//number of tiles in x direction 
+        	for(int y = 0; y < tileheight; y++) {//number of tiles in y direction
+        		
+        		if(y > 0) {
+        			Tiles[x][y].up = Tiles[x][y-1];
+        		}
+        		if( x < tilewidth-1){
+        			Tiles[x][y].right = Tiles[x+1][y];
+        		}
+        		if( y < tileheight-1){
+        			Tiles[x][y].down = Tiles[x][y+1];
+        		}
+        		if( x > 0){
+        			Tiles[x][y].left = Tiles[x-1][y];
+        		}
+        	}
+    	}
     	
+    	//for tunnels
+    	Tiles[14][0].left = Tiles[27][14];
+    	Tiles[14][27].right = Tiles[0][14];
+    	
+    	//fix maze
+    	Tiles[13][11].type = type.Bkgnd;
+    	Tiles[14][11].type = type.Bkgnd;
+    	//creates wall above ghost pen
+    	Tiles[13][12].type = type.Wall;
+    	Tiles[14][12].type = type.Wall;
+    	//this fixes that the createmaze views ready message as power pills
+    	Tiles[9][16].type = type.Bkgnd;
+    	Tiles[18][16].type = type.Bkgnd;
+    	for(int x = 9;x<=18;x++){
+    		Tiles[x][17].type = type.Bkgnd;
+    	}
+	}
+    
+    
+    public void createMaze(ArrayList<Scalar> mazeColours) {
     	BufferedImage bufferedImage = robot.createScreenCapture(area);
     	Mat src = img2Mat(bufferedImage);
         
@@ -61,6 +109,7 @@ public class ImageExtractor {
         
     	for (int x = 0; x < tilewidth; x++) {//number of tiles in x direction 
         	for(int y = 0; y < tileheight; y++) {//number of tiles in y direction
+        		
         		Tiles[x][y] = new Tile(x, y, type.Bkgnd);
         		
         		Rect roi = new Rect((x*blocksize), (y*blocksize),blocksize, blocksize);	
@@ -73,7 +122,7 @@ public class ImageExtractor {
     				double contourArea = Imgproc.contourArea(contour);
     				if(contourArea == 1.0){
     					Tiles[x][y].type = type.Pill;
-    					GameState.pills.add(Tiles[x][y]);//is this okay to do?
+    					pills.add(Tiles[x][y]);//is this okay to do?
     				} else {
     					Tiles[x][y].type = type.Power;
     				}
@@ -88,43 +137,62 @@ public class ImageExtractor {
         		}
         	}
     	}
-    	
+	}
+    public void printSurroundingTiles(){
+    	for (int x = 0; x < tilewidth; x++) {//number of tiles in x direction 
+        	for(int y = 0; y < tileheight; y++) {//number of tiles in y direction
+				System.out.println("Tile[" + x + "][" + y + "]'s surrounding Tiles: ");
+				if(Tiles[x][y].up != null){
+					System.out.println("Up = " + "Tile[" + Tiles[x][y].up.x + "][" + Tiles[x][y].up.y + "]");
+				}
+				if(Tiles[x][y].right != null){
+					System.out.println("Right = " + "Tile[" + Tiles[x][y].right.x + "][" + Tiles[x][y].right.y + "]");
+				}
+				if(Tiles[x][y].down != null){
+					System.out.println("Down = " + "Tile[" + Tiles[x][y].down.x + "][" + Tiles[x][y].down.y + "]");
+				}
+				if(Tiles[x][y].left != null){
+					System.out.println("Left = " + "Tile[" + Tiles[x][y].left.x + "][" + Tiles[x][y].left.y + "]");
+				}       		
+				System.out.println();
+        	}
+    	}
+	}
+    public void printMaze(){
     	//testing
+    	System.out.print("\t");
+    	for (int r = 0; r<tilewidth;r++){
+    		if(r<10){
+    			System.out.print(" " + r + " ");
+    		} else {
+    			System.out.print(" " + r);
+    		}
+
+    	}
+    	System.out.println();
     	for (int c = 0; c <tileheight;c++){
-	    	for (int r = 0; r<tilewidth;r++){
-    	    	
-    	        System.out.print(r + " " + c + " ");
-    	        System.out.print(Tiles[r][c].type + "\t");
+    		System.out.print(c + "\t");
+	    	for (int r = 0; r<tilewidth;r++){   		
+    	    	if(Tiles[r][c].type == type.Wall){
+    	    		System.out.print(" # ");
+    	    	} else if(Tiles[r][c].type == type.Bkgnd){
+    	    		System.out.print("   ");
+    	    	} else if(Tiles[r][c].type == type.Pill){
+    	    		System.out.print(" o ");
+    	    	} else if(Tiles[r][c].type == type.Power){
+    	    		System.out.print(" O ");
+    	    	}
     	    }
     	    System.out.println();
     	}
-	}
-    
-    public void update(ArrayList<Scalar> colours) throws Exception {
+    }
+ 
+    public void updatePacmanGhosts(ArrayList<Scalar> colours) throws Exception {	
     	BufferedImage bufferedImage = robot.createScreenCapture(area);
-    	
-    	updatePacmanGhosts(bufferedImage, colours);
-    	gs.updatePills(bufferedImage);
-    	gs.updatePowerPills(bufferedImage);
     	/*
 	    File outputfile = new File("image.png");
 	    ImageIO.write(bufferedImage, "png", outputfile);
 	    */
-    	
-    	/*//testing
-    	for (int c = 0; c <tileheight;c++){
-	    	for (int r = 0; r<tilewidth;r++){
-    	    	
-    	        System.out.print(r + " " + c + " ");
-    	        System.out.print(Tiles[r][c].type + "\t");
-    	    }
-    	    System.out.println();
-    	}*/
-	}
-
-    public void updatePacmanGhosts(BufferedImage bufferedImage, ArrayList<Scalar> colours) throws Exception {	    
-	  
-	    
 	    Mat src = img2Mat(bufferedImage);
         
         Mat mask = new Mat();
@@ -144,7 +212,25 @@ public class ImageExtractor {
     			Point2D coordinates = new Point2D.Double((rect.x + (rect.width/2)) ,(rect.y + (rect.height/2)));
     			double contourArea = Imgproc.contourArea(contours.get(i));	
     			
-				gs.updateLocations(x, coordinates, contourArea, bufferedImage);
+    			if(x == 5){
+    				//System.out.println("edible ghosts");
+    				if(isGhost(coordinates, contourArea) && !inSpawn(coordinates)){
+    					edibleGhostLoc.put(i, coordinates);
+    					//empty list after... dont really need to
+    				}
+    			} else {
+    				if (isPacMan(x, coordinates)) {
+        	            pacCoordinates = coordinates;
+        			} else if (isGhost(coordinates, contourArea) && !inSpawn(coordinates)) {     	
+    		            // need to update the state of the ghost distance
+        				System.out.println("hey");
+    		        	ghostLoc.put(x, coordinates);
+        			} else if (isGhost(coordinates, contourArea) && inSpawn(coordinates)){
+        				ghostLoc.remove(x);
+        				//ghostLoc.put(x, null);
+        			}
+    			}
+    			
 			}
     		
     		//testing
@@ -153,32 +239,36 @@ public class ImageExtractor {
     		} else {
     			Core.add(combMask,mask,combMask);
     		}
-    		//
-    		
-
         }
 		
-		showImage(combMask);
-		
-		//System.out.println("image extraction done");
-		
+		//showImage(combMask);		
+		//System.out.println("image extraction done");		
 	}
     
-    
-    
+    JFrame frame=new JFrame();//testing
+    JLabel lbl=new JLabel();//testing
+
     public void showImage(Mat combMask){
+    	
     	BufferedImage img2 = mat2img(combMask);
 		ImageIcon icon=new ImageIcon(img2);
+		
 	    frame.setIconImage(img2);
-	    frame.setLayout(new FlowLayout());        
+	    frame.getContentPane().setLayout(new FlowLayout());        
 	    frame.setSize(img2.getWidth(null)+50, img2.getHeight(null)+50);     
-	    
+	     
 	    lbl.setIcon(icon);
-	    frame.add(lbl);
+	    frame.getContentPane().add(lbl);
 	    frame.setVisible(true);
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame.setFocusableWindowState(false);
     }
+    
+    public void findMaze(){
+    	
+    	BufferedImage screenShot = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+    }
+    
     
     protected Mat img2Mat(BufferedImage in) {
         Mat out;
@@ -209,6 +299,22 @@ public class ImageExtractor {
 	      System.arraycopy(b, 0, targetPixels, 0, b.length);  
 	      return image;
 	}
+
+    public boolean isPacMan(int x, Point2D coords) {		
+		return x == 4 && coords.getY() < 495.0;
+        //only do it if coordinates aren't outside the game
+    }
+    
+    public boolean isGhost(Point2D coords, double area) {
+    	return coords.getY() < 495.0 && area > 346.0 && area < 431.0;
+    }
+    public boolean inSpawn(Point2D coords) {
+    	
+    	int tileX = (int) (coords.getX()/16);
+    	int tileY = (int) (coords.getY()/16);
+    	System.out.println("spawn : " + tileX + " "+ tileY);
+    	return 10 <= tileX && tileX <= 17 && 12 <= tileY && tileY <= 16;
+    }
 
 	
 
